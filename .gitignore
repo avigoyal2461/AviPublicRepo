@@ -174,3 +174,5 @@ dotNETApp/WebApp/LICENSE
 *.pdf
 *.key
 *.cert
+
+!/client/*
