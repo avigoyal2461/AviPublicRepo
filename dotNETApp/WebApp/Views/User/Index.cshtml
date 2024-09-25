@@ -1,0 +1,239 @@
+﻿@using Models
+@model List<Models.UserViewModel>
+
+@{
+    ViewData["Title"] = "BP Users";
+    string[] TableHeaders = new string[]
+    {
+    "userid"
+    ,"username"
+    ,"validfromdate"
+    ,"useremail"
+    ,"loginattempts"
+    ,"FullUser"
+    ,"Action"
+    };
+
+    Layout = "_Layout";
+}
+
+<link rel="stylesheet" href="/css/table.css"/>
+
+<script>
+
+$(window).resize(function () {
+    $(window).width();
+});
+$(document).ready(function () {
+    $("#loaderDiv").show();
+    set_table();
+});
+
+    $('.changeBodyBackgroundFullColor').on('click', function () {
+        if ($(this).attr('data-color') == 'default') {
+            $('body').removeAttr('data-background-full');
+        } else {
+            $('body').attr('data-background-full', $(this).attr('data-color'));
+        }
+
+        $(this).parent().find('.changeBodyBackgroundFullColor').removeClass("selected");
+        $(this).addClass("selected");
+        layoutsColors();
+    });
+
+    $('.changeLogoHeaderColor').on('click', function () {
+        if ($(this).attr('data-color') == 'default') {
+            $('.logo-header').removeAttr('data-background-color');
+        } else {
+            $('.logo-header').attr('data-background-color', $(this).attr('data-color'));
+        }
+
+        $(this).parent().find('.changeLogoHeaderColor').removeClass("selected");
+        $(this).addClass("selected");
+        customCheckColor();
+        layoutsColors();
+    });
+
+    $('.changeTopBarColor').on('click', function () {
+        if ($(this).attr('data-color') == 'default') {
+            $('.main-header .navbar-header').removeAttr('data-background-color');
+        } else {
+            $('.main-header .navbar-header').attr('data-background-color', $(this).attr('data-color'));
+        }
+
+        $(this).parent().find('.changeTopBarColor').removeClass("selected");
+        $(this).addClass("selected");
+        layoutsColors();
+    });
+
+    $('.changeSideBarColor').on('click', function () {
+        if ($(this).attr('data-color') == 'default') {
+            $('.sidebar').removeAttr('data-background-color');
+        } else {
+            $('.sidebar').attr('data-background-color', $(this).attr('data-color'));
+        }
+
+        $(this).parent().find('.changeSideBarColor').removeClass("selected");
+        $(this).addClass("selected");
+        layoutsColors();
+    });
+
+    $('.changeBackgroundColor').on('click', function () {
+        $('body').removeAttr('data-background-color');
+        $('body').attr('data-background-color', $(this).attr('data-color'));
+        $(this).parent().find('.changeBackgroundColor').removeClass("selected");
+        $(this).addClass("selected");
+    });
+
+    function customCheckColor() {
+        var logoHeader = $('.logo-header').attr('data-background-color');
+        if (logoHeader !== "white") {
+            $('.logo-header .navbar-brand').attr('src', '/img/logo.svg');
+        } else {
+            $('.logo-header .navbar-brand').attr('src', '/img/logo2.svg');
+        }
+    }
+
+
+    var toggle_customSidebar = false,
+        custom_open = 0;
+
+    if (!toggle_customSidebar) {
+        var toggle = $('.custom-template .custom-toggle');
+
+        toggle.on('click', (function () {
+            if (custom_open == 1) {
+                $('.custom-template').removeClass('open');
+                toggle.removeClass('toggled');
+                custom_open = 0;
+            } else {
+                $('.custom-template').addClass('open');
+                toggle.addClass('toggled');
+                custom_open = 1;
+            }
+        })
+        );
+        toggle_customSidebar = true;
+    }
+function set_table() {
+    $("#BPUsers").DataTable({
+        "pageLength": 5,
+        initComplete: function () {
+            this.api().columns().every(function () {
+                var column = this;
+                var select = $('<select class="form-control"><option value=""></option></select>')
+                    .appendTo($(column.footer()).empty())
+                    .on('change', function () {
+                        var val = $.fn.dataTable.util.escapeRegex(
+                            $(this).val()
+                        );
+
+                        column
+                            .search(val ? '^' + val + '$' : '', true, false)
+                            .draw();
+                    });
+
+                column.data().unique().sort().each(function (d, j) {
+                    select.append('<option value="' + d + '">' + d + '</option>')
+                });
+            });
+            resolve();
+        }
+    });
+}
+</script>
+
+<link rel="stylesheet" href="/css/demo.css">
+<h3>@ViewData["Title"]</h3>
+<div class="content">
+    <div class="page-inner">
+        <div class="page-header">
+            <h4 class="page-title">BP Allowed Users</h4>
+            <ul class="breadcrumbs">
+                <li class="nav-home">
+                    <a href="/Home">
+                        <i class="flaticon-home"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        BPA Users
+                    </h4>
+                </div>
+                <form>
+                    <button asp-action="Create" asp-controller="User" class="btn btn-primary">Create User</button>
+                </form>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="BPUsers" class="display table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    @{
+                                        foreach (var head in TableHeaders)
+                                        {
+                                                    <th>
+                                                    @head
+                                                    </th>
+                                        }
+                                     }
+                                        </tr>
+                    
+                            </thead>
+                
+                            <tbody>
+                                @{
+                                    if (Model != null && Model.Any())
+                                    {
+                                        foreach (var user in Model)
+                                        {
+                                                    <tr>
+                                                        <td>@user.userid</td>
+                                                        <td>@user.username</td>
+                                                        <td>@(user.validfromdate?.ToString("MM/dd/yyyy") ?? "No Valid Date Found")</td>
+                                                        <td>@user.useremail</td>
+                                                        <td>@user.loginattempts</td>
+                                                        <td>@user.FullUser</td>
+                                                        <td>
+                                                            <div class="btn-group btn-group-sm">
+                                                                <a asp-controller="User" asp-action="Edit" asp-route-id="@user.userid" class="btn btn-primary mr-1" style="margin-right: 5px">Edit</a>
+                                                                <a asp-controller="User" asp-action="Delete" asp-route-id="@user.userid" class="btn btn-danger">Delete</a>
+
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                        }
+                                    }
+                                    else {
+                                                    <tr>
+                                                    <td colspan=@TableHeaders.Length - 1>
+                                                            <div>
+                                                                No Users Available at this moment.
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                        }
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    @{
+                                        foreach (var head in TableHeaders)
+                                        {
+                                                    <th>
+                                                    @head
+                                                    </th>
+                                        }
+                                     }
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

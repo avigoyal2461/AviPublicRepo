@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='utf-8' />
+    <title>Add custom markers in Mapbox GL JS</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1' />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css' rel='stylesheet' />
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            background-color: white;
+            /*padding: 688px;*/
+        }
+
+        #map {
+            position: absolute;
+            margin-left: 700px;
+            top: 0;
+            bottom: 0;
+            width: 28%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='map'></div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic2FyYW55YWNpdHJ1cyIsImEiOiJjbDVrbHRqNGowYmN3M2NteDVnYXdobHdsIn0.yX6iuNxyxzb82utARce7YA';
+
+        const bounds = [
+            [-85.17, 20.73], // Southwest coordinates
+            [-60.3, 50.73] // Northeast coordinates
+
+        ];
+
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/satellite-streets-v11',
+            center: [-77.9, 34.23],
+            maxBounds: bounds,
+            zoom: 1
+        });
+
+        var data = {{ geojson| safe}};
+
+        for (i = 0; data.features.length; i++) {
+            coordinates = data.features[i].geometry.coordinates
+            year = data.features[i].properties["Established Year"]
+            address = data.features[i].properties["Address"]
+            state = data.features[i].properties["State"]
+            rvp = data.features[i].properties["RVP"]
+            name = data.features[i].properties["Name"]
+            email = data.features[i].properties["Email Id"]
+            phone = data.features[i].properties["Cell No"]
+            work_phone = data.features[i].properties["Work Phone No"]
+            installations = data.features[i].properties["Installation Works"]
+            total_installs = data.features[i].properties["Total Installs"]
+            total_pto = data.features[i].properties["Total PTO"]
+            system_size = data.features[i].properties["System Size"]
+            employees = data.features[i].properties["Total Employees"]
+            total_rep = data.features[i].properties["Total Sales Rep"]
+            office_phone = data.features[i].properties["Main Office Contact Number"]
+            marker_color = data.features[i].properties['Marker Color']
+
+            const marker = new mapboxgl.Marker({ color: marker_color, scale: 0.65 })
+                .setLngLat(coordinates)
+                .setPopup(new mapboxgl.Popup({ offset: 5 })
+                    .setHTML(
+                        `<strong> Established Year: </strong> ${year} <br>
+                         <strong> Address: </strong> ${address} <br>
+                         <strong> State: </strong> ${state} <br>
+                         <strong> RVP: </strong> ${rvp} <strong> Name: </strong> ${name} <br>
+                         <strong> Email Id: </strong> ${email} <br>
+                         <strong> Cell No: </strong> ${phone} <br>
+                         <strong> Work Phone No: </strong> ${work_phone} <br>
+                         <strong> Total Employees: </strong> ${employees} <br>
+                         <strong> Total Sales Rep: </strong> ${total_rep} <br>
+                         <strong> Main Office Contact Number: </strong> ${office_phone}<br>
+                         <strong> Installation Works: </strong> ${installations} <br>
+                         <strong> Total Installs: </strong> ${total_installs} <br>
+                         <strong> Total PTO: </strong> ${total_pto}<br>
+                         <strong> System Size: </strong> ${system_size} <br>`
+                    ))
+                .addTo(map);
+            map.on('click', (e) => {
+                locate = e.lngLat
+                //map.flyTo({ center: locate, duration: 12000, essential: true, zoom: 10 });
+                //map.flyTo({ center: locate, duration: 12000, essential: true, zoom: 10 });
+            })
+        }
+    </script>
+</body>
+
+</html>

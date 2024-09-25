@@ -1,0 +1,90 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+     <TargetFramework>net8.0</TargetFramework>
+    <WebProject_DirectoryAccessLevelKey>0</WebProject_DirectoryAccessLevelKey>
+    <UserSecretsId>0a38413c-083e-4e45-910f-0b8e6bdd3d5e</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="Views\Home\charts-sparkline.cshtml" />
+    <Content Remove="Views\Home\charts.cshtml" />
+    <Content Remove="Views\Home\forms.cshtml" />
+    <Content Remove="Views\Home\layout-compact-sidebar.cshtml" />
+    <Content Remove="Views\Home\layout-icon-menu.cshtml" />
+    <Content Remove="Views\Home\layout-overlay-sidebar.cshtml" />
+    <Content Remove="Views\Home\layout-sidebar-style-1.cshtml" />
+    <Content Remove="Views\Home\layout-static-sidebar.cshtml" />
+    <Content Remove="Views\Home\maps-jqvmap.cshtml" />
+    <Content Remove="Views\Home\page-403.cshtml" />
+    <Content Remove="Views\Home\page-404.cshtml" />
+    <Content Remove="Views\Home\page-500.cshtml" />
+    <Content Remove="Views\Home\page-blank.cshtml" />
+    <Content Remove="Views\Home\register.cshtml" />
+    <Content Remove="Views\Home\tables-data.cshtml" />
+    <Content Remove="Views\Home\tables-simple.cshtml" />
+    <Content Remove="Views\Home\ui-avatars.cshtml" />
+    <Content Remove="Views\Home\ui-buttons.cshtml" />
+    <Content Remove="Views\Home\ui-flaticons.cshtml" />
+    <Content Remove="Views\Home\ui-fontawesome.cshtml" />
+    <Content Remove="Views\Home\ui-gridsystem.cshtml" />
+    <Content Remove="Views\Home\ui-notifications.cshtml" />
+    <Content Remove="Views\Home\ui-panels.cshtml" />
+    <Content Remove="Views\Home\ui-simpleline.cshtml" />
+    <Content Remove="Views\Home\ui-sweetalert.cshtml" />
+    <Content Remove="Views\Home\ui-typography.cshtml" />
+    <Content Remove="Views\Home\widgets.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="bootstrap" Version="5.3.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.AzureAD.UI" Version="6.0.33" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Identity.Web" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Identity.Web.UI" Version="1.4.0" />
+    <PackageReference Include="Microsoft.SqlServer.Types" Version="160.1000.6" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Views\Test\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Views\Home\charts-sparkline.cshtml" />
+    <None Include="Views\Home\charts.cshtml" />
+    <None Include="Views\Home\forms.cshtml" />
+    <None Include="Views\Home\layout-compact-sidebar.cshtml" />
+    <None Include="Views\Home\layout-icon-menu.cshtml" />
+    <None Include="Views\Home\layout-overlay-sidebar.cshtml" />
+    <None Include="Views\Home\layout-sidebar-style-1.cshtml" />
+    <None Include="Views\Home\layout-static-sidebar.cshtml" />
+    <None Include="Views\Home\maps-jqvmap.cshtml" />
+    <None Include="Views\Home\page-403.cshtml" />
+    <None Include="Views\Home\page-404.cshtml" />
+    <None Include="Views\Home\page-500.cshtml" />
+    <None Include="Views\Home\page-blank.cshtml" />
+    <None Include="Views\Home\register.cshtml" />
+    <None Include="Views\Home\tables-data.cshtml" />
+    <None Include="Views\Home\tables-simple.cshtml" />
+    <None Include="Views\Home\ui-avatars.cshtml" />
+    <None Include="Views\Home\ui-buttons.cshtml" />
+    <None Include="Views\Home\ui-flaticons.cshtml" />
+    <None Include="Views\Home\ui-fontawesome.cshtml" />
+    <None Include="Views\Home\ui-gridsystem.cshtml" />
+    <None Include="Views\Home\ui-notifications.cshtml" />
+    <None Include="Views\Home\ui-panels.cshtml" />
+    <None Include="Views\Home\ui-simpleline.cshtml" />
+    <None Include="Views\Home\ui-sweetalert.cshtml" />
+    <None Include="Views\Home\ui-typography.cshtml" />
+    <None Include="Views\Home\widgets.cshtml" />
+  </ItemGroup>
+
+</Project>

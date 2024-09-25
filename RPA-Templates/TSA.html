@@ -1,0 +1,672 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Tsa Dashboard</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head> -->
+
+{% extends "layouts/base.html" %}
+
+{% block title %} TSA Datatable {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+<style>
+    .loader {
+        border: 16px solid #f3f3f3; /* Light grey */
+        border-top: 16px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .collapsible {
+      width: 100%
+    }
+
+    .collapsible td {
+      padding: 10px;
+    }
+
+    .collapsible:hover {
+      background-color: #f1f1f1;
+      cursor: pointer;
+    }
+    .collapsible.collapsed {
+      display: none;
+    }
+
+</style>
+<div class="content">
+    <div class="page-inner">
+        <div class="page-header">
+            <h4 class="page-title">TSA Dashboard</h4>
+            <ul class="breadcrumbs">
+                <li class="nav-home">
+                    <a href="https://trinity-rpa-dev.trinity-solar.com/index">
+                        <i class="flaticon-home"></i>
+                    </a>
+                </li>
+                <!-- <li class="separator">
+                    <i class="flaticon-right-arrow"></i>
+                </li>
+                <li class="nav-item">
+                    <a href="#">Tables</a>
+                </li>
+                <li class="separator">
+                    <i class="flaticon-right-arrow"></i>
+                </li>
+                <li class="nav-item">
+                    <a href="#">Datatables</a>
+                </li> -->
+            </ul>
+        </div>
+
+        <!-- <div class="row"> -->
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">TSA Dashboard</h4>
+                        <form class="form-inline" id="dateRangeForm">
+                            <div class="row">
+                                <div class="form-group mb-2">
+                                    <div class="form-group">
+                                        <label for="startDate">Start Date:</label>
+                                        <input type="date" id="startDate" name="startDate">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="endDate">End Date:</label>
+                                        <input type="date" id="endDate" name="endDate">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="eventType">Event Type:</label>
+                                        <select id="eventType" name="eventType">
+                                            <option value="ANY">ANY</option>
+                                            {% for event in event_types %}
+                                            <option value="{{ event }}">{{ event }}</option>
+                                            {% endfor %}
+                                            <!-- <option value="ALTER_FUNCTION">ALTER_FUNCTION</option>
+                                            <option value="ALTER_INDEX">ALTER_INDEX</option>
+                                            <option value="ALTER_PROCEDURE">ALTER_PROCEDURE</option>
+                                            <option value="ALTER_TABLE">ALTER_TABLE</option>
+                                            <option value="ALTER_TRIGGER">ALTER_TRIGGER</option>
+                                            <option value="ALTER_VIEW">ALTER_VIEW</option>
+                                            <option value="CREATE_FUNCTION">CREATE_FUNCTION</option>
+                                            <option value="CREATE_INDEX">CREATE_INDEX</option>
+                                            <option value="CREATE_PROCEDURE">CREATE_PROCEDURE</option>
+                                            <option value="CREATE_SCHEMA">CREATE_SCHEMA</option>
+                                            <option value="CREATE_TABLE">CREATE_TABLE</option>
+                                            <option value="CREATE_USER">CREATE_USER</option>
+                                            <option value="DROP_INDEX">DROP_INDEX</option>
+                                            <option value="DROP_PROCEDURE">DROP_PROCEDURE</option>
+                                            <option value="DROP_TABLE">DROP_TABLE</option>
+                                            <option value="DROP_USER">DROP_USER</option>
+                                            <option value="GRANT_DATABASE">GRANT_DATABASE</option>
+                                            <option value="RENAME">RENAME</option>
+                                            <option value="UPDATE_STATISTICS">UPDATE_STATISTICS</option> -->
+                                        </select>
+                                    </div>
+                                <div class="form-group">
+                                    <label for="Schema Name">Schema Name:</label>
+                                    <select id="SchemaName" name="SchemaName">
+                                        <option value="ANY">ANY</option>
+                                        {% for schema in schema_names %}
+                                        <option value="{{ schema }}">{{ schema }}</option>
+                                        {% endfor %}
+                                        <!-- <option value="book">book</option>
+                                        <option value="com">com</option>
+                                        <option value="dbo">dbo</option>
+                                        <option value="fdy">fdy</option>
+                                        <option value="predict">predict</option>
+                                        <option value="rpa">rpa</option>
+                                        <option value="roof">roof</option>
+                                        <option value="STG">STG</option>
+                                        <option value="TSA">TSA</option>
+                                        <option value="tbd">tbd</option>
+                                        <option value="uam">uam</option>
+                                        <option value="windmar">windmar</option>
+                                        <option value="wolf">wolf</option>
+                                        <option value="NULL">NULL</option> --> -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="Database">Database:</label>
+                                    <select id="database" name="database">
+                                        <option value="PROD">PROD</option>
+                                        <option value="DEV">DEV</option>
+                                        <option value="UAT">UAT</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <input class="btn btn-primary mb-2" type="submit" value="Submit">
+                                </div>
+                                </div> 
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="TSA-Table" class="display table table-striped table-hover" >
+                                <thead>
+                                    <tr>
+                                        <th>Event Date</th>
+                                        <th>Event Type</th>
+                                        <th>Schema Name</th>
+                                        <th>Object Name</th>
+                                        <th>Host Name</th>
+                                        <th>IP Address</th>
+                                        <th>Program Name</th>
+                                        <th>Login Name</th>
+                                    </tr>
+                                </thead>
+                                <tfoot>
+                                    <tr>
+                                        <th>Event Date</th>
+                                        <th>Event Type</th>
+                                        <th>Schema Name</th>
+                                        <th>Object Name</th>
+                                        <th>Host Name</th>
+                                        <th>IP Address</th>
+                                        <th>Program Name</th>
+                                        <th>Login Name</th>
+                                    </tr>
+                                </tfoot>
+                                <tbody>
+                                    <div class="loader"></div>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %} -->
+
+<!-- Atlantis DEMO methods, don't include it in your project! -->
+<script src="/static/assets/js/TSA.js"></script>
+
+{% endblock javascripts %}
+
+<!-- ****************************************************************************************************************************************************** -->
+<!-- <style>
+    h2 {
+        background-color: #C8AE7E;
+    }
+    /* Set font styles */
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+    }
+    
+    /* Set styles for table */
+    #processes {
+        width: 100%;
+        border-collapse: collapse;
+        border: 2px solid #ddd;
+        table-layout: fixed;
+        width: 100%;
+    }
+    
+    /* Set styles for table header row */
+    #processes th {
+        padding: 12px;
+        background-color: #4CAF50;
+        color: white;
+        font-weight: bold;
+        text-align: left;
+    }
+    
+    /* Set styles for table data rows */
+    #processes td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        width: 50px;
+        word-wrap: break-word;
+    }
+    #processes description {
+        /*width: 150px;*/
+        word-wrap: break-word;
+    }
+    /* Set styles for even-numbered rows */
+    #processes tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+    
+    /* Set styles for hover effect on rows */
+    #processes tbody tr:hover {
+        background-color: #ddd;
+    }
+    .collapsible {
+      background-color: white;
+      width: 100%
+    }
+
+    .collapsible td {
+      padding: 10px;
+    }
+
+    .collapsible:hover {
+      background-color: #f1f1f1;
+      cursor: pointer;
+    }
+    .collapsible.collapsed {
+      display: none;
+    }
+
+    .peachpuff {
+        background-color: peachpuff;
+        font-weight: bold;
+    }
+
+    .lightblue {
+        background-color: lightblue;
+        font-weight: bold;
+    }
+
+    .lavender {
+        background-color: lavender;
+        font-weight: bold;
+    }
+
+    .honeydew {
+        background-color: honeydew;
+        font-weight: bold;
+    }
+
+    .mintcream {
+        background-color: mintcream;
+        font-weight: bold;
+    }
+
+    .beige {
+        background-color: beige;
+        font-weight: bold;
+    }
+
+    .ivory {
+        background-color: ivory;
+        font-weight: bold;
+    }
+
+    .aliceblue {
+        background-color: aliceblue;
+        font-weight: bold;
+    }
+
+    .lightpink {
+        background-color: lightpink;
+        font-weight: bold;
+    }
+
+    /* Add more color styles below */
+
+    .lightcyan {
+        background-color: lightcyan;
+        font-weight: bold;
+    }
+
+    .azure {
+        background-color: azure;
+        font-weight: bold;
+    }
+
+    .mintcream {
+        background-color: mintcream;
+        font-weight: bold;
+    }
+
+    .lavenderblush {
+        background-color: lavenderblush;
+        font-weight: bold;
+    }
+
+    .cornsilk {
+        background-color: cornsilk;
+        font-weight: bold;
+    }
+
+    .palegoldenrod {
+        background-color: palegoldenrod;
+        font-weight: bold;
+    }
+
+    .lightgray {
+        background-color: lightgray;
+        font-weight: bold;
+    }
+
+    .lightyellow {
+        background-color: lightyellow;
+        font-weight: bold;
+    }
+
+    .mistyrose {
+        background-color: mistyrose;
+        font-weight: bold;
+    }
+
+    .linen {
+        background-color: linen;
+        font-weight: bold;
+    }
+    .steelblue { background-color: steelblue;
+                font-weight: bold;
+    }
+    .blue { background-color: RoyalBlue;
+            font-weight: bold;
+    }
+    .plum {
+        background-color: plum;
+        font-weight: bold;
+    }
+    .red {
+        background-color: red;
+        font-weight: bold;
+    }
+    .green {
+        background-color: MediumSpringGreen;
+        font-weight: bold;
+    }
+    .purple {
+        background-color: purple;
+        font-weight: bold;
+    }
+    .orange {
+        background-color: orange;
+        font-weight: bold;
+    }
+    .pink {
+        background-color: pink;
+        font-weight: bold;
+    }
+    .teal {
+        background-color: teal;
+        font-weight: bold;
+    }
+    .gray {
+        background-color: gray;
+        font-weight: bold;
+    }
+    .brown {
+        background-color: brown;
+        font-weight: bold;
+    }
+    .navy {
+        background-color: navy;
+        font-weight: bold;
+    }
+    .magenta {
+        background-color: magenta;
+        font-weight: bold;
+    }
+    .cyan {
+        background-color: cyan;
+        font-weight: bold;
+    }
+    .yellow {
+        background-color: yellow;
+        font-weight: bold;
+    }
+    .olive {
+        background-color: olive;
+        font-weight: bold;
+    }
+    .peachpuff {
+        background-color: peachpuff;
+        font-weight: bold;
+    }
+    .thistle {
+        background-color: thistle;
+        font-weight: bold;
+    }
+    .lightyellow {
+        background-color: lightyellow;
+        font-weight: bold;
+    }
+    .salmon {
+        background-color: salmon;
+        font-weight: bold;
+    }
+    .sandybrown {
+        background-color: sandybrown;
+        font-weight: bold;
+    }
+    .peru {
+        background-color: peru;
+        font-weight: bold;
+    }
+    .lightpink {
+        background-color: lightpink;
+        font-weight: bold;
+    }
+    .mediumturquoise {
+        background-color: mediumturquoise;
+        font-weight: bold;
+    }
+    .aquamarine {
+        background-color: aquamarine;
+        font-weight: bold;
+    }
+</style>
+<body>
+    <h1>TSA Dashboard</h1>
+    <form id="dateRangeForm" action="/tsa" method="post">
+        <label for="startDate">Start Date:</label>
+        <input type="date" id="startDate" name="startDate">
+
+        <label for="endDate">End Date:</label>
+        <input type="date" id="endDate" name="endDate">
+
+        <label for="eventType">Event Type:</label>
+        <select id="eventType" name="eventType">
+            <option value="ANY">ANY</option>
+            <option value="ALTER_FUNCTION">ALTER_FUNCTION</option>
+            <option value="ALTER_INDEX">ALTER_INDEX</option>
+            <option value="ALTER_PROCEDURE">ALTER_PROCEDURE</option>
+            <option value="ALTER_TABLE">ALTER_TABLE</option>
+            <option value="ALTER_TRIGGER">ALTER_TRIGGER</option>
+            <option value="ALTER_VIEW">ALTER_VIEW</option>
+            <option value="CREATE_FUNCTION">CREATE_FUNCTION</option>
+            <option value="CREATE_INDEX">CREATE_INDEX</option>
+            <option value="CREATE_PROCEDURE">CREATE_PROCEDURE</option>
+            <option value="CREATE_SCHEMA">CREATE_SCHEMA</option>
+            <option value="CREATE_TABLE">CREATE_TABLE</option>
+            <option value="CREATE_USER">CREATE_USER</option>
+            <option value="DROP_INDEX">DROP_INDEX</option>
+            <option value="DROP_PROCEDURE">DROP_PROCEDURE</option>
+            <option value="DROP_TABLE">DROP_TABLE</option>
+            <option value="DROP_USER">DROP_USER</option>
+            <option value="GRANT_DATABASE">GRANT_DATABASE</option>
+            <option value="RENAME">RENAME</option>
+            <option value="UPDATE_STATISTICS">UPDATE_STATISTICS</option>
+        </select>
+
+        <label for="Schema Name">Schema Name:</label>
+        <select id="SchemaName" name="SchemaName">
+            <option value="ANY">ANY</option>
+            <option value="book">book</option>
+            <option value="com">com</option>
+            <option value="dbo">dbo</option>
+            <option value="fdy">fdy</option>
+            <option value="predict">predict</option>
+            <option value="rpa">rpa</option>
+            <option value="roof">roof</option>
+            <option value="STG">STG</option>
+            <option value="TSA">TSA</option>
+            <option value="tbd">tbd</option>
+            <option value="uam">uam</option>
+            <option value="windmar">windmar</option>
+            <option value="wolf">wolf</option>
+            <option value="NULL">NULL</option>
+        </select>
+
+        <label for="Database">Database:</label>
+        <select id="database" name="database">
+            <option value="PROD">PROD</option>
+            <option value="DEV">DEV</option>
+            <option value="UAT">UAT</option>
+        </select>
+
+            <input type="submit" value="Submit">
+    </form>
+    <table id="processes">
+        <thead>
+            <tr>
+                <th>Event Date</th>
+                <th>Event Type</th>
+                <th>Schema Name</th>
+                <th>Object Name</th>
+                <th>Host Name</th>
+                <th>IP Address</th>
+                <th>Program Name</th>
+                <th>Login Name</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <script>
+        function print_data(data) {
+            $.each(data, function (index, process) {
+                var row = $('<tr>');
+                row.append($('<td>').text(process.Event_Date));
+                //alterfunction, altertrigger, 
+                var Event = $('<td>');
+                try {
+                    if (process.Event_Type.includes('alter_function')) {
+                        Event.text(process.Event_Type).addClass('linen');
+                    } else if (process.Event_Type.includes('alter_index')) {
+                        Event.text(process.Event_Type).addClass('salmon');
+                    } else if (process.Event_Type.includes('alter_procedure')) {
+                        Event.text(process.Event_Type).addClass('palegoldenrod');
+                    } else if (process.Event_Type.includes('alter_table')) {
+                        Event.text(process.Event_Type).addClass('peachpuff');
+                    } else if (process.Event_Type.includes('alter_trigger')) {
+                        Event.text(process.Event_Type).addClass('mistyrose');
+                    } else if (process.Event_Type.includes('alter_view')) {
+                        Event.text(process.Event_Type).addClass('pink');
+                    } else if (process.Event_Type.includes('create_function')) {
+                        Event.text(process.Event_Type).addClass('lavender');
+                    } else if (process.Event_Type.includes('create_index')) {
+                        Event.text(process.Event_Type).addClass('honeydew');
+                    } else if (process.Event_Type.includes('create_procedure')) {
+                        Event.text(process.Event_Type).addClass('cornsilk');
+                    } else if (process.Event_Type.includes('create_schema')) {
+                        Event.text(process.Event_Type).addClass('lightyellow');
+                    } else if (process.Event_Type.includes('create_table')) {
+                        Event.text(process.Event_Type).addClass('beige');
+                    } else if (process.Event_Type.includes('create_user')) {
+                        Event.text(process.Event_Type).addClass('thistle');
+                    } else if (process.Event_Type.includes('drop_index')) {
+                        Event.text(process.Event_Type).addClass('lightgray');
+                    } else if (process.Event_Type.includes('drop_procedure')) {
+                        Event.text(process.Event_Type).addClass('mintcream');
+                    } else if (process.Event_Type.includes('drop_table')) {
+                        Event.text(process.Event_Type).addClass('lavenderblush');
+                    } else if (process.Event_Type.includes('drop_user')) {
+                        Event.text(process.Event_Type).addClass('peru');
+                    } else if (process.Event_Type.includes('grant_database')) {
+                        Event.text(process.Event_Type).addClass('cornsilk');
+                    } else if (process.Event_Type.includes('rename')) {
+                        Event.text(process.Event_Type).addClass('mediumturquoise');
+                    } else if (process.Event_Type.includes('update_statistics')) {
+                        Event.text(process.Event_Type).addClass('aquamarine');
+                    } else {
+                        Event.text(process.Event_Type);
+                    }
+                } catch (error) {
+                    Event.text('Null');
+                }
+                row.append(Event);
+                
+                var Schema = $('<td>');
+                try {
+                    if (process.Schema_Name.includes('fdy')) {
+                        Schema.text(process.Schema_Name).addClass('cornsilk');
+                    } else if (process.Schema_Name.includes('book')) {
+                        Schema.text(process.Schema_Name).addClass('salmon');
+                    } else if (process.Schema_Name.includes('rpa')) {
+                        Schema.text(process.Schema_Name).addClass('lavenderblush');
+                    } else if (process.Schema_Name.includes('roof')) {
+                        Schema.text(process.Schema_Name).addClass('peachpuff');
+                    } else if (process.Schema_Name.includes('stg')) {
+                        Schema.text(process.Schema_Name).addClass('mintcream');
+                    } else if (process.Schema_Name.includes('tbd')) {
+                        Schema.text(process.Schema_Name).addClass('lightgray');
+                    } else if (process.Schema_Name.includes('predict')) {
+                        Schema.text(process.Schema_Name).addClass('mistyrose');
+                    } else if (process.Schema_Name.includes('Null')) {
+                        Schema.text(process.Schema_Name).addClass('gray');
+                    } else if (process.Schema_Name.includes('tsa')) {
+                        Schema.text(process.Schema_Name).addClass('plum');
+                    } else if (process.Schema_Name.includes('uam')) {
+                        Schema.text(process.Schema_Name).addClass('lightyellow');
+                    } else if (process.Schema_Name.includes('windmar')) {
+                        Schema.text(process.Schema_Name).addClass('lavender');
+                    } else if (process.Schema_Name.includes('com')) {
+                        Schema.text(process.Schema_Name).addClass('thistle');
+                    } else if (process.Schema_Name.includes('dbo')) {
+                        Schema.text(process.Schema_Name).addClass('beige');
+                    } else if (process.Schema_Name.includes('wolf')) {
+                        Schema.text(process.Schema_Name).addClass('honeydew');
+                    } else {
+                        Schema.text(process.Schema_Name);
+                    }
+                } catch (error) {
+                    Schema.text('Null').addClass('peru')
+                }
+
+                row.append(Schema);
+
+                row.append($('<td>').text(process.Object_Name));
+                row.append($('<td>').text(process.Host_Name));
+                row.append($('<td>').text(process.IPAddress));
+                row.append($('<td>').text(process.Program_Name));
+                row.append($('<td>').text(process.Login_Name));
+
+                var collapsibleRow = $('<tr class="collapsible collapsed">');
+                var collapsibleCell = $('<td colspan="8">');
+                collapsibleCell.html('Event DDL: ' + process.Event_XML.replace(/\n/g, '<br>'));
+                collapsibleRow.append(collapsibleCell);
+                row.click(function () {
+                    collapsibleRow.toggle();
+                    collapsibleRow.insertAfter(row);
+                });
+                $('#processes tbody').append(row);
+                $('#processes tbody').append(collapsibleRow);
+                $('#processes tbody').append(row);
+            });
+        }
+        $(document).ready(function () {
+            $.get('/tsaDash', function (data) {
+                print_data(data)
+            });
+        });
+
+        
+        function Generating() {
+            var tempDiv = document.createElement('div');
+            var maindiv = document.getElementById('processes')
+
+            tempDiv.innerHTML = '<p>Retrieving Data...</p>';
+
+            //tempDiv.classList.add("chat-messagebot")
+            maindiv.appendChild(tempDiv)
+
+            setTimeout(function () {
+                tempDiv.remove();
+            }, 900);
+
+        }
+    </script>
+</body>
+</html> -->

@@ -1,0 +1,37 @@
+﻿@using System.Security.Principal
+@using System.Security.Claims
+@{
+    Layout = "_Layout";
+}
+@if (User.Identity?.IsAuthenticated == true)
+{
+    var identity = User.Identity as ClaimsIdentity; // Azure AD V2 endpoint specific
+    string preferred_username = identity.Claims.FirstOrDefault(c => c.Type == "preferred_username")?.Value;
+    <ul class="nav navbar-nav navbar-right">
+        <li class="navbar-text">Hello @preferred_username</li>
+        <li><a asp-area="AzureAD" asp-controller="Account" asp-action="SignOut">Sign out</a></li>
+    </ul>
+}
+else
+{
+    <ul class="nav navbar-nav navbar-left">
+        <li><a asp-area="AzureAD" asp-controller="Account" asp-action="Signin">Sign in</a></li>
+    </ul>
+    <p>Please sign in before continuing</p>
+}
+
+@* <!--ul class="navbar-nav">
+@if (User.Identity?.IsAuthenticated == true)
+{
+        <span class="navbar-text text-dark">Hello @User.Identity?.Name! You are being null checked for some reason ?</span>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignOut">Sign out</a>
+        </li>
+}
+else
+{
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignIn">Sign in</a>
+        </li>
+}
+</ul--> *@

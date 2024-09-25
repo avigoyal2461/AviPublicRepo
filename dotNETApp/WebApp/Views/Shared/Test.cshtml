@@ -1,0 +1,38 @@
+﻿@using Models
+@model TestViewModel
+@{
+    ViewData["Title"] = "Test Page";
+}
+<h1>@ViewData["Title"]</h1>
+
+<p>This is a test page -> @Model.Message</p>
+<div>
+    <div class="card-tools">
+        <button class="btn btn-icon btn-link btn-primary btn-xs btn-refresh-card"><span class="fa fa-sync-alt"></span></button>
+    </div>
+    <form class="form-inline" id="DateRangeModel", method="post" action="/Test/Submit">
+        <div class="row">
+            <div class="form-group mb-2">
+                <div class="form-group">
+                    <label for="StartTime">Start Date:</label>
+                    <input type="date" id="StartTime" name="StartTime">
+                </div>
+                <div class="form-group">
+                    <label for="EndTime">End Date:</label>
+                    <input type="date" id="EndTime" name="EndTime">
+                </div>
+                <div class="form-group">
+                    <label for="Process_Name">Process Name:</label>
+                    <select id="Process_Name" name="Process_Name">
+                        <option value="ALL">ALL</option>
+                        <option value="None">None</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input class="btn btn-primary mb-2" type="submit" value="Submit">
+                </div>
+            </div>
+        </div>
+        </form>
+</div>
+<!--<a href='@Url.Action("{action}", "{controller}")'> click me </a> -->

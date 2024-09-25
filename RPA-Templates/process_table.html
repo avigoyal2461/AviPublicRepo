@@ -1,0 +1,141 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} TSA Datatable {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Process Dashboard</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head> -->
+<style>
+    .loader {
+        border: 16px solid #f3f3f3; /* Light grey */
+        border-top: 16px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .collapsible {
+      width: 100%
+    }
+
+    .collapsible td {
+      padding: 10px;
+    }
+
+    .collapsible:hover {
+      background-color: #f1f1f1;
+      cursor: pointer;
+    }
+    .collapsible.collapsed {
+      display: none;
+    }
+
+</style>
+<div class="content">
+    <div class="page-inner">
+        <div class="page-header">
+            <h4 class="page-title">Process Dashboard</h4>
+                <ul class="breadcrumbs">
+                    <li class="nav-home">
+                        <a href="https://trinity-rpa-dev.trinity-solar.com/index">
+                            <i class="flaticon-home"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Process Dashboard</h4>
+                        <div class="card-tools">
+                            <button class="btn btn-icon btn-link btn-primary btn-xs btn-refresh-card"><span class="fa fa-sync-alt"></span></button>
+                        </div>
+                        <form class="form-inline" id="dateRangeForm">
+                            <div class="row">
+                                <div class="form-group mb-2">
+                                    <div class="form-group">
+                                        <label for="startDate">Start Date:</label>
+                                        <input type="date" id="startDate" name="startDate">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="endDate">End Date:</label>
+                                        <input type="date" id="endDate" name="endDate">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="Process_Name">Process Name:</label>
+                                        <select id="Process_Name" name="Process_Name">
+                                            <option value="ALL">ALL</option>
+                                            {% for name in process_names %}
+                                            <option value="{{ name }}">{{ name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <input class="btn btn-primary mb-2" type="submit" value="Submit">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="processes" class="display table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Process Id</th>
+                                        <th>Process Name</th>
+                                        <th>Is This Continuous?</th>
+                                        <th>Last Updated TimeStamp</th>
+                                        <th>Running?</th>
+                                        <th>Completed Today</th>
+                                        <th>Completed Last Hour</th>
+                                        <th>Started But Not Finished Today</th>
+                                        <th>Process Description</th>
+                                    </tr>
+                                </thead>
+                                <tfoot>
+                                    <tr>
+                                        <th>Process Id</th>
+                                        <th>Process Name</th>
+                                        <th>Is This Continuous?</th>
+                                        <th>Last Updated TimeStamp</th>
+                                        <th>Running?</th>
+                                        <th>Completed Today</th>
+                                        <th>Completed Last Hour</th>
+                                        <th>Started But Not Finished Today</th>
+                                        <th>Process Description</th>
+                                    </tr>
+                                </tfoot>
+                                <tbody>
+                                    <div class="loader"></div>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %} -->
+
+<!-- Atlantis DEMO methods, don't include it in your project! -->
+<script src="/static/assets/js/Process_Dashboard.js"></script>
+
+{% endblock javascripts %}

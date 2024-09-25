@@ -1,0 +1,104 @@
+		<!-- Sidebar -->
+		@if (User.Identity?.IsAuthenticated == true)
+{
+	<div class="sidebar sidebar-style-2" data-background-color="dark2">
+		<div class="sidebar-wrapper scrollbar scrollbar-inner">
+			<div class="sidebar-content">
+				<div class="user">
+					<!-- <div class="avatar-sm float-left mr-2">
+						<img src="/static/assets/img/profile.jpg" alt="..." class="avatar-img rounded-circle">
+					</div> -->
+					<div class="avatar-sm float-left mr-2">
+						<div class="avatar-img rounded-circle" id="initialsAvatar"></div>
+					</div>
+					<script>
+						var fullName = '@Html.Raw(User.Identity.Name)'; // Replace with the user's full name
+						var initials = fullName.split('@@').map(name => name[0]).join('');
+						const initialsAvatar = document.getElementById('initialsAvatar');
+
+						const uppercaseLetters = initials.match(/[A-Z]/g);
+						initialsAvatar.textContent = uppercaseLetters;
+						//initialsAvatar.textContent = "AG";
+					</script>
+
+					<div class="info">
+						<a data-toggle="collapse" href="#collapseExample" aria-expanded="true">
+							<span>
+								@User.Identity.Name
+								<span class="user-level">
+									@User.Identity.Name
+								</span>
+								<span class="caret"></span>
+							</span>
+						</a>
+						<div class="clearfix"></div>
+
+						<div class="collapse in" id="collapseExample">
+							<ul class="nav">
+								<li>
+									<a href="#profile">
+										<span class="link-collapse">My Profile</span>
+									</a>
+								</li>
+								<li>
+										<a href="https://trinity-rpa-dev.trinity-solar.com/logout">
+										<span class="link-collapse">Logout</span>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<ul class="nav nav-primary">
+					<li class="nav-item {% if 'index' in segment %} active {% endif %}">
+						<a data-toggle="collapse" href="#dashboard" class="collapsed" aria-expanded="false">
+							<i class="fas fa-home"></i>
+							<p>Dashboard</p>
+							<span class="caret"></span>
+						</a>
+						<div class="collapse {% if 'index' in segment %} show {% endif %}" id="dashboard">
+							<ul class="nav nav-collapse">
+								<li>
+									<a asp-area="" asp-controller="Home" asp-action="Index">
+										<span class="sub-item">Dashboard</span>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</li>
+					<li class="nav-section">
+						<span class="sidebar-mini-icon">
+							<i class="fa fa-ellipsis-h"></i>
+						</span>
+						<h4 class="text-section">Components</h4>
+					</li>
+					<li class="nav-item {% if 'tables' in segment %} active {% endif %}">
+						<a data-toggle="collapse" href="#tables">
+							<i class="fas fa-table"></i>
+							<p>Tables</p>
+							<span class="caret"></span>
+						</a>
+						<div class="collapse {% if 'tables-' in segment %} show {% endif %}" id="tables">
+							<ul class="nav nav-collapse">
+								<li class="{% if 'tables-simple' in segment %} active {% endif %}">
+									<a asp-area="" asp-controller="Resource" asp-action="Resource">
+										<span class="sub-item">BP Resources</span>
+									</a>
+								</li>
+								<li class="{% if 'tables-simple' in segment %} active {% endif %}">
+									<a asp-area="" asp-controller="WorkQueue" asp-action="WorkQueue">
+										<span class="sub-item">Work Queues</span>
+									</a>
+								</li>
+								@* <li class="{% if 'tables-data' in segment %} active {% endif %}">
+									<a asp-area="" asp-controller="User" asp-action="User">
+										<span class="sub-item">BPA Users</span>
+									</a>
+								</li> *@
+							</ul>
+						</div>
+					</li>
+			</div>
+		</div>
+	</div>
+	}

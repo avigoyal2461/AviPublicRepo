@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<head>
+  <title>Trinity ChatBot</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='openai.css') }}", type="text/css" />
+</head>
+<header>
+  <div class="container">
+    <div class="logo">
+      <a href="https://www.trinity-solar.com/">
+        <img src="https://www.trinity-solar.com/wp-content/uploads/2020/02/Trinity_Logo_White_SVG.svg"
+        alt="Trinity Solar Logo"
+        />
+      </a>
+    </div>
+
+  </div>
+</header>
+
+
+<body>
+    <style>
+    body {
+    background-image: url("{{ url_for('static', filename='home-panels.jpg') }}");
+    }
+    </style>
+    <h3>Trinity Chat Bot</h3>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: '/openAIdiv',
+                dataType: 'json',
+                success: function (data) {
+                    $.each(data, function (index, div_data) {
+                        var new_div = $('<div></div>').attr('id', div_data.id).text(div_data.content);
+                        $('body').append(new_div);
+                    });
+                }
+            });
+        });
+    </script>
+    <script>
+        /*function submit() {
+            var prompt = document.getElementsByName("Prompt").value;
+            console.log(prompt);
+            add_response_human(prompt);
+            Generating();
+        }*/
+        function Generating() {
+            //var div = document.getElementById('result');
+            // div.innerHTML = '';
+            //div.remove();
+            var tempDiv = document.createElement('div');
+            //tempDiv.classList.add('chat-messagebot');
+            tempDiv.className.add('chat-messagebot')
+            tempDiv.innerHTML = '<p>Generating Response...</p>';
+
+            document.body.appendChild(tempDiv);
+
+            setTimeout(function () {
+                tempDiv.remove();
+            }, 15000);
+
+        }
+
+        function create_advanced_div(id, link, question, parta, partb, advanced_prompt) {
+            console.log(id)
+            if (id == 'usermessages') {
+                add_response_human(advanced_prompt)
+            }
+            else if (id == 'botmessages') {
+                add_advanced_response_bot(link, question, parta, partb, advanced_prompt)
+            }
+        }
+        function add_response_human(text) {
+            console.log("Adding Human response...")
+            var maindiv = document.getElementById('chat-body')
+            var mainContainer = document.getElementById('chat-container')
+
+            //var myDiv = document.getElementById('usermessages');
+            var myDiv = document.createElement('div');
+            myDiv.classList.add('chat-messageuser');
+            var myPara = document.createElement('p');
+            var paraText = document.createTextNode(text);
+
+            myPara.appendChild(paraText);
+            myDiv.appendChild(myPara);
+
+            maindiv.appendChild(myDiv);
+
+            //myDiv.classList.add('chat-messageuser');
+            //myDiv.innerHTML = text;
+
+            //document.body.appendChild(mainContainer);
+
+        }
+        function add_advanced_response_bot(link, question, parta, partb, advanced_prompt) {
+            console.log("???")
+            var maindiv = document.getElementById('chat-body')
+            var mainContainer = document.getElementById('chat-container')
+
+            //var myDiv = document.getElementById('botmessages');
+            var myDiv = document.createElement('div');
+            myDiv.classList.add('chat-messagebot');
+
+
+            var myPara = document.createElement('p');
+            var paraText1 = document.createTextNode(advanced_prompt)
+            var paraText = document.createTextNode(parta)
+
+            myPara.appendChild(paraText1)
+
+            var br = document.createElement("br");
+            myPara.appendChild(br);
+
+            myPara.appendChild(paraText);
+
+
+            var myLink = document.createElement("a");
+            myLink.href = link;
+            var linkText = document.createTextNode(question);
+
+            var br = document.createElement("br");
+            myPara.appendChild(br);
+
+            myLink.appendChild(linkText);
+            myPara.appendChild(myLink);
+
+            var paraText2 = document.createTextNode(" " + partb);
+            myPara.appendChild(paraText2);
+            //myDiv.appendChild(myPara)
+
+            myDiv.appendChild(myPara);
+            maindiv.appendChild(myDiv);
+            //mainContainer.appendChild(maindiv)
+            // myDiv.classList.add('chat-messagebot');
+            //myDiv.innerHTML = text;
+
+            //document.body.appendChild(mainContainer);
+            //document.body.appendChild(maindiv);
+
+        }
+        function add_response_bot(text, extra_prompt) {
+            var maindiv = document.getElementById('chat-body')
+            var mainContainer = document.getElementById('chat-container')
+
+            var myDiv = document.getElementById('botmessages');
+            //var myDiv = document.getElementsByClassName('chat-messagebot')
+            var myPara = document.createElement('p');
+            var paraText = document.createTextNode(text + "\n" + extra_prompt);
+
+            myPara.appendChild(paraText);
+            myDiv.appendChild(myPara);
+            maindiv.appendChild(myDiv);
+
+
+
+            //myDiv.classList.add('chat-messagebot');
+            //myDiv.innerHTML = text;
+
+            //document.body.appendChild(mainContainer);
+        }
+    </script>
+
+    <div class="chat-container" , id="chat-container">
+        <div class="chat-header">
+            <h3>Chat with Trinity Solar</h3>
+        </div>
+        <div class="chat-body" , id="chat-body">
+            <div class="chat-messageuser" id="usermessages">
+                <p>Hello!</p>
+            </div>
+            <div class="chat-messagebot" id="botmessages">
+                <p>Hello, I am a Trinity Solar chatbot, how may I assist you today?</p>
+            </div>
+        </div>
+        <form id="form_id" action="/openAI" method="post">
+
+            <div class="chat-footer">
+                <input type="text" name="Prompt" placeholder="Type your message here..." required>
+                <input type="submit" value="Submit" onclick="Generating()" />
+            </div>
+        </form>
+    </div>
+
+    {% if advanced_prompt %}
+    {% for item in div_data %}
+        <script>
+            var id = "{{ item['id'] }}";
+            console.log(id)
+            var advanced_prompt = `{{ item['advanced_prompt'] }}`;
+            var question = "{{ item['question'] }}";
+            var link = "{{ item['link'] }}";
+            var parta = "{{ item['parta'] }}";
+            var partb = "{{ item['partb'] }}";
+            create_advanced_div(id, link, question, parta, partb, advanced_prompt);
+        </script>
+    {% endfor %}
+
+    {% endif %}
+
+
+
+</body>

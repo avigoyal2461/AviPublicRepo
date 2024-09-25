@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>@ViewData["Title"] - My C# Web Application</title>
+    <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
+    <link rel="icon" href="/img/icon.ico" type="image/x-icon" />
+    <link rel="canonical" href="https://appseed.us/admin-dashboards/flask-dashboard-atlantis-dark">
+
+    <script src="/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+        WebFont.load({
+            google: { "families": ["Lato:300,400,700,900"] },
+            custom: {
+                "families": ["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"],
+                urls: ['/css/fonts.min.css']
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            }
+        });
+    </script>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/atlantis.min.css">
+
+    <link rel="stylesheet" href="/css/demo.css">
+</head>
+@if (User.Identity?.IsAuthenticated == true)
+{
+    @await Html.PartialAsync("scripts.cshtml")
+    @RenderSection("scripts", required: false)
+    <body data-background-color ="dark">
+    <div class="wrapper">
+        @await Html.PartialAsync("navigation.cshtml")
+        @await Html.PartialAsync("sidebar.cshtml")
+        <div class="main-panel">
+            @RenderBody()
+        </div>
+        @await Html.PartialAsync("footer.cshtml")
+        @await Html.PartialAsync("configuration-plugin.cshtml")
+
+
+
+        @* @Html.RenderPartial("includes/navigation.cshtml") *@
+    <!--header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Test" asp-action="Test">Test</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="User">BP Users</a>
+                        </li>
+                    </ul>
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header-->
+    </div>
+    @* <div class="main-panel">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+        @await Html.PartialAsync("footer")
+
+    </div> *@
+
+
+        <!--footer class="border-top footer text-muted"-->
+        <!--div class="container">
+            &copy; 2024 - active_directory_aspnetcore_webapp_openidconnect_v2_aspnetcore3_1 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </!--div>
+    </footer-->
+    @* <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script> *@
+
+</body>
+
+
+}
+else 
+{
+    <ul class="nav navbar-nav navbar-left">
+        <li><a asp-area="AzureAD" asp-controller="Account" asp-action="Signin">Sign in</a></li>
+    </ul>
+    <p>Please sign in before continuing</p>
+}
+</html>

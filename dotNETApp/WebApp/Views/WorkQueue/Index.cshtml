@@ -1,0 +1,246 @@
+﻿@using Models
+@model List<Models.WorkQueueModel>
+
+@{
+    ViewData["Title"] = "BP Work Queues";
+    string[] TableHeaders = new string[]
+    {
+    "Name"
+    ,"Key Field"
+    ,"Pending Items"
+    ,"Deferred Items"
+    ,"Completed Items"
+    ,"Exceptioned Items"
+    ,"View"
+    ,"Max Attempts"
+    ,"Total Items Processed"
+    ,"Average Work Time"
+    ,"Total Work Time"
+    ,"Active Lock"
+    ,"Active Lock Time"
+    };
+
+    Layout = "_Layout";
+}
+<!--script src="/js/tables.js"</script-->
+<link rel="stylesheet" href="/css/table.css" />
+
+<script>
+    $(window).resize(function () {
+        $(window).width();
+    });
+    $(document).ready(function () {
+        set_table();
+    });
+
+    $('.changeBodyBackgroundFullColor').on('click', function () {
+        if ($(this).attr('data-color') == 'default') {
+            $('body').removeAttr('data-background-full');
+        } else {
+            $('body').attr('data-background-full', $(this).attr('data-color'));
+        }
+
+        $(this).parent().find('.changeBodyBackgroundFullColor').removeClass("selected");
+        $(this).addClass("selected");
+        layoutsColors();
+    });
+
+    $('.changeLogoHeaderColor').on('click', function () {
+        if ($(this).attr('data-color') == 'default') {
+            $('.logo-header').removeAttr('data-background-color');
+        } else {
+            $('.logo-header').attr('data-background-color', $(this).attr('data-color'));
+        }
+
+        $(this).parent().find('.changeLogoHeaderColor').removeClass("selected");
+        $(this).addClass("selected");
+        customCheckColor();
+        layoutsColors();
+    });
+
+    $('.changeTopBarColor').on('click', function () {
+        if ($(this).attr('data-color') == 'default') {
+            $('.main-header .navbar-header').removeAttr('data-background-color');
+        } else {
+            $('.main-header .navbar-header').attr('data-background-color', $(this).attr('data-color'));
+        }
+
+        $(this).parent().find('.changeTopBarColor').removeClass("selected");
+        $(this).addClass("selected");
+        layoutsColors();
+    });
+
+    $('.changeSideBarColor').on('click', function () {
+        if ($(this).attr('data-color') == 'default') {
+            $('.sidebar').removeAttr('data-background-color');
+        } else {
+            $('.sidebar').attr('data-background-color', $(this).attr('data-color'));
+        }
+
+        $(this).parent().find('.changeSideBarColor').removeClass("selected");
+        $(this).addClass("selected");
+        layoutsColors();
+    });
+
+    $('.changeBackgroundColor').on('click', function () {
+        $('body').removeAttr('data-background-color');
+        $('body').attr('data-background-color', $(this).attr('data-color'));
+        $(this).parent().find('.changeBackgroundColor').removeClass("selected");
+        $(this).addClass("selected");
+    });
+
+    function customCheckColor() {
+        var logoHeader = $('.logo-header').attr('data-background-color');
+        if (logoHeader !== "white") {
+            $('.logo-header .navbar-brand').attr('src', '/img/logo.svg');
+        } else {
+            $('.logo-header .navbar-brand').attr('src', '/img/logo2.svg');
+        }
+    }
+
+
+    var toggle_customSidebar = false,
+        custom_open = 0;
+
+    if (!toggle_customSidebar) {
+        var toggle = $('.custom-template .custom-toggle');
+
+        toggle.on('click', (function () {
+            if (custom_open == 1) {
+                $('.custom-template').removeClass('open');
+                toggle.removeClass('toggled');
+                custom_open = 0;
+            } else {
+                $('.custom-template').addClass('open');
+                toggle.addClass('toggled');
+                custom_open = 1;
+            }
+        })
+        );
+        toggle_customSidebar = true;
+    }
+        function set_table() {
+            $("#WorkQueues").DataTable({
+                "pageLength": 10,
+                initComplete: function () {
+                    this.api().columns().every(function () {
+                        var column = this;
+                        var select = $('<select class="form-control"><option value=""></option></select>')
+                            .appendTo($(column.footer()).empty())
+                            .on('change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                column
+                                    .search(val ? '^' + val + '$' : '', true, false)
+                                    .draw();
+                            });
+
+                        column.data().unique().sort().each(function (d, j) {
+                            select.append('<option value="' + d + '">' + d + '</option>')
+                        });
+                    });
+                }
+            });
+        }
+</script>
+
+<link rel="stylesheet" href="/css/demo.css">
+<h3>@ViewData["Title"]</h3>
+<div class="content">
+    <div class="page-inner">
+        <div class="page-header">
+            <h4 class="page-title">BP Work Queues</h4>
+            <ul class="breadcrumbs">
+                <li class="nav-home">
+                    <a href="/Home">
+                        <i class="flaticon-home"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        Work Queues
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="WorkQueues" class="display table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    @{
+                                        foreach (var head in TableHeaders)
+                                        {
+                                            <th>
+                                                @head
+                                            </th>
+                                        }
+                                    }
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                @{
+                                    if (Model != null && Model.Any())
+                                    {
+                                        foreach (var queue in Model)
+                                        {
+                                            <tr>
+                                                <td>@queue.name</td>
+                                                <td>@queue.keyfield</td>
+                                                <td>@queue.pending</td>
+                                                <td>@queue.deferred</td>
+                                                <td>@queue.completed</td>
+                                                <td>@queue.exceptioned</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a asp-controller="WorkQueueItem" asp-action="Post" asp-route-id="@queue.id" class="btn btn-primary mr-1" style="margin-right: 5px">View</a>
+                                                        @*<a asp-controller="WorkQueueItem" asp-action="Delete" asp-route-id="@queue.id" class="btn btn-danger">Delete</a>*@
+                                                    </div>
+                                                </td>
+                                                <td>@queue.maxattemps</td>
+                                                <td>@queue.total</td>
+                                                <td>@queue.averageworktime</td>
+                                                <td>@queue.totalworktime</td>
+                                                <td>@queue.activelock</td>
+                                                <td>@queue.activelocktime</td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan=@TableHeaders.Length - 1>
+                                                <div>
+                                                    No Queues Available at this moment.
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    @{
+                                        foreach (var head in TableHeaders)
+                                        {
+                                            <th>
+                                                @head
+                                            </th>
+                                        }
+                                    }
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

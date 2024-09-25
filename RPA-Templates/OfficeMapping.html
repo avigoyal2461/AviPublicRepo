@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='utf-8'/>
+    <title>Add custom markers in Mapbox GL JS</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'/>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css' rel='stylesheet'/>
+    <script src="https://cdn.jsdelivr.net/npm/mapbox-gl-animated-popup@v0.4.0/dist/mapbox-gl-animated-popup.min.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            background-color: white;
+            /*padding: 688px;*/
+        }
+
+        fieldset {
+            margin: 0;
+            max-width: 100%;
+            text-align: center;
+            font-size: 23px;
+            background-color: rgb(240, 201, 128);
+            font-family: 'Oswald';
+            border: 0;
+        }
+
+        #map {
+            position: absolute;
+            margin-left: 700px;
+            top: 0;
+            bottom: 0;
+            width: 28%;
+        }
+
+        .mapboxgl-popup-content {
+            margin: 0;
+            padding: 0px;
+            color: #18180e;
+            background-color: #f4f1e9e7;
+            max-width: 250px;
+            box-shadow: 3px 3px 2px #755656;
+            font-family: 'Oswald';
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+<div id='map'></div>
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1Ijoic2FyYW55YWNpdHJ1cyIsImEiOiJjbDVrbHRqNGowYmN3M2NteDVnYXdobHdsIn0.yX6iuNxyxzb82utARce7YA';
+
+    const bounds = [
+        [-85.17, 20.73], // Southwest coordinates
+        [-60.3, 50.73] // Northeast coordinates
+
+    ];
+
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/light-v11',
+        //style: 'mapbox://styles/mapbox/streets-v11',
+        center: [-77.9, 34.23],
+        maxBounds: bounds,
+        zoom: 1
+    });
+
+
+    var data = {{ geojson| safe}};
+
+
+    for (i = 0; data.features.length; i++) {
+        coordinates = data.features[i].geometry.coordinates
+        year = data.features[i].properties["Established Year"]
+        address = data.features[i].properties["Address"]
+        state = data.features[i].properties["State"]
+        rvp = data.features[i].properties["RVP"]
+        marker_color = data.features[i].properties["Marker Color"]
+        popup = new AnimatedPopup({
+            offset: 5,
+            openingAnimation: {
+                duration: 100,
+                easing: 'easeOutElastic',
+                transform: 'scale'
+            },
+            closingAnimation: {
+                duration: 300,
+                easing: 'easeInBack',
+                transform: 'scale'
+            }
+        })
+        if (rvp === 'Yes') {
+            name = data.features[i].properties["Name"]
+            email = data.features[i].properties["Email Id"]
+            phone = data.features[i].properties["Cell No"]
+            work_phone = data.features[i].properties["Work Phone No"]
+            officer_dp = data.features[i].properties["Officer DP"]
+            office_dp = data.features[i].properties["Office DP"]
+            
+            let el = document.createElement("div")
+            el.innerHTML = `
+                <svg
+                    display="block"
+                    height="26.650000000000002px"
+                    width="17.55px"
+                    viewBox="0 0 27 41"
+                  >
+                    <defs>
+                      <radialGradient id="shadowGradient">
+                        <stop offset="10%" stop-opacity="0.4"></stop>
+                        <stop offset="100%" stop-opacity="0.05"></stop>
+                      </radialGradient>
+                    </defs>
+                    <ellipse
+                      cx="13.5"
+                      cy="34.8"
+                      rx="10.5"
+                      ry="5.25"
+                      fill="url(#shadowGradient)"
+                    ></ellipse>
+                    <path
+                      fill=${marker_color}
+                      d="M27,13.5C27,19.07 20.25,27 14.75,34.5C14.02,35.5 12.98,35.5 12.25,34.5C6.75,27 0,19.22 0,13.5C0,6.04 6.04,0 13.5,0C20.96,0 27,6.04 27,13.5Z"
+                    ></path>
+                    <path
+                      opacity="0.25"
+                      d="M13.5,0C6.04,0 0,6.04 0,13.5C0,19.22 6.75,27 12.25,34.5C13,35.52 14.02,35.5 14.75,34.5C20.25,27 27,19.07 27,13.5C27,6.04 20.96,0 13.5,0ZM13.5,1C20.42,1 26,6.58 26,13.5C26,15.9 24.5,19.18 22.22,22.74C19.95,26.3 16.71,30.14 13.94,33.91C13.74,34.18 13.61,34.32 13.5,34.44C13.39,34.32 13.26,34.18 13.06,33.91C10.28,30.13 7.41,26.31 5.02,22.77C2.62,19.23 1,15.95 1,13.5C1,6.58 6.58,1 13.5,1Z"
+                    ></path>
+                    <circle fill="white" cx="13.5" cy="13.5" r="5.5"></circle>
+                  </svg>`
+            el.id = "marker" + i
+            el.setAttribute("data-coordinates", coordinates)
+            my_popup = popup
+                .setHTML(
+                    `<fieldset id='my_popup'>
+                            <strong>Trinity Solar</strong>
+                            </fieldset>
+                            <p style='text-align: center;'> <img src = '/static/${office_dp}\'' style = 'height: 50%; width: 50%;'> <br>
+                            <strong> Established Year: </strong> ${year} <br>
+                            <strong> Address: </strong> ${address} <br>
+                            <strong> State: </strong> ${state} <br>
+                            <strong> RVP: </strong> ${rvp} <strong> Name: </strong> ${name} <br>
+                            <img src = '/static/${officer_dp}\'' style = 'height: 40%; width: 40%;'> <br>
+                            <strong> Cell No: </strong> ${phone} <br>
+                            <strong> Work Phone No: </strong> ${work_phone} <br>
+                            <a href = "mailto: ${email}" style = 'color: black; color: blue; outline: none; text-align: center'> <strong> Email: </strong> ${email} </a>`
+                )
+            const marker = new mapboxgl.Marker(el, {color: marker_color, scale: 0.65})
+                .setLngLat(coordinates)
+                .setPopup(my_popup)
+                .addTo(map);
+            el.addEventListener('click', (x) => {
+                console.log(office_dp)
+                locate = x.currentTarget.getAttribute('data-coordinates')
+                cords = locate.split(',')
+                map.flyTo({center: cords, duration: 1000, essential: true, zoom: 5});
+            })
+        } else {
+            let el = document.createElement("div")
+            el.innerHTML = `
+                <svg
+                    display="block"
+                    height="26.650000000000002px"
+                    width="17.55px"
+                    viewBox="0 0 27 41"
+                  >
+                    <defs>
+                      <radialGradient id="shadowGradient">
+                        <stop offset="10%" stop-opacity="0.4"></stop>
+                        <stop offset="100%" stop-opacity="0.05"></stop>
+                      </radialGradient>
+                    </defs>
+                    <ellipse
+                      cx="13.5"
+                      cy="34.8"
+                      rx="10.5"
+                      ry="5.25"
+                      fill="url(#shadowGradient)"
+                    ></ellipse>
+                    <path
+                      fill=${marker_color}
+                      d="M27,13.5C27,19.07 20.25,27 14.75,34.5C14.02,35.5 12.98,35.5 12.25,34.5C6.75,27 0,19.22 0,13.5C0,6.04 6.04,0 13.5,0C20.96,0 27,6.04 27,13.5Z"
+                    ></path>
+                    <path
+                      opacity="0.25"
+                      d="M13.5,0C6.04,0 0,6.04 0,13.5C0,19.22 6.75,27 12.25,34.5C13,35.52 14.02,35.5 14.75,34.5C20.25,27 27,19.07 27,13.5C27,6.04 20.96,0 13.5,0ZM13.5,1C20.42,1 26,6.58 26,13.5C26,15.9 24.5,19.18 22.22,22.74C19.95,26.3 16.71,30.14 13.94,33.91C13.74,34.18 13.61,34.32 13.5,34.44C13.39,34.32 13.26,34.18 13.06,33.91C10.28,30.13 7.41,26.31 5.02,22.77C2.62,19.23 1,15.95 1,13.5C1,6.58 6.58,1 13.5,1Z"
+                    ></path>
+                    <circle fill="white" cx="13.5" cy="13.5" r="5.5"></circle>
+                  </svg>`
+            el.id = "marker" + i
+            el.setAttribute("data-coordinates", coordinates)
+            my_popup = popup
+                .setHTML(
+                    `<fieldset id='my_popup'>
+                                <strong>Trinity Solar</strong>
+                            </fieldset>
+                            <p style='text-align: center;'> <img src = '/static/${office_dp}\'' style = 'height: 50%; width: 50%;'> <br>
+                            <strong> Established Year: </strong> ${year} <br>
+                            <strong> Address: </strong> ${address} <br>
+                            <strong> State: </strong> ${state} <br>
+                            <strong> RVP: </strong> ${rvp} <br>`
+                )
+            const marker = new mapboxgl.Marker(el, {color: marker_color, scale: 0.65})
+                .setLngLat(coordinates)
+                .setPopup(my_popup)
+                .addTo(map);
+            el.addEventListener('click', (x) => {
+                locate = x.currentTarget.getAttribute('data-coordinates')
+                cords = locate.split(',')
+                map.flyTo({center: cords, duration: 1000, essential: true, zoom: 5});
+            })
+        }
+        my_popup.on('close', () => {
+            let active_popup = document.getElementById('my_popup')
+            if (active_popup) {
+                // do nothing
+            } else {
+                map.flyTo(
+                    {
+                        center: [-77.9, 34.23], zoom: 3
+                    }
+                )
+            }
+        })
+    }
+    //map.addControl(new mapboxgl.NavigationControl());
+    // .setPopup(new mapboxgl.Popup({ offset: 5 })    
+</script>
+</body>
+
+</html>

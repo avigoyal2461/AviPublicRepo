@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    #container {
+        min-width: 310px;
+        max-width: 1200px;
+        height: 600px;
+        margin: 0 auto;
+    }
+    .map-overlay {
+        font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        position: absolute;        
+        right: 10px;
+        background-color: rgb(255, 255, 255);
+        border-radius: 5px;
+        padding: 10px;
+        top:3px
+    }      
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.6/proj4.js"></script>
+<script src="https://code.highcharts.com/maps/highmaps.js"></script>
+<script src="https://code.highcharts.com/mapdata/countries/us/us-all.js"></script>
+<script src="https://code.highcharts.com/modules/marker-clusters.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<body>
+    <div id="container"></div>
+    <div class="map-overlay"> 
+        <fieldset>           
+            <select id="StateCode" name="StateCode" height="20px" width="200px">
+                <option value="" selected disabled hidden>Select State-Code</option>
+                <option value="ALL">All</option> 
+                <option value="CT">Connecticut</option> 
+                <option value="FL">Florida</option> 
+                <option value="MD">Maryland</option> 
+                <option value="MA">Massachusetts</option>
+                <option value="NJ">New Jersey</option>
+                <option value="NY">New York</option> 
+                <option value="PA">Pennsylvania</option>
+                <option value="RI">Rhode Island</option>
+            </select> 
+            <div id='RSAcompleted' align='left'></div>
+            <div id='RSApending' align='left'></div>
+        </fieldset>
+    </div>  
+    <script>         
+        function RoofMapping(data, RSAcompleted, RSApending, state){
+            Highcharts.mapChart('container', {
+                    chart: {
+                        map: 'countries/us/us-all'
+                    },
+                    title: {
+                        text: 'TrinitySolar - Roof Mapping'
+                    },                
+                    mapNavigation: {
+                        enabled: true
+                    },                
+                    tooltip: {
+                        formatter: function () { 
+                            if (this.point.clusteredData) { 
+                                return state + ': ' + this.point.clusterPointsAmount;
+                            }                      
+                            return '<strong>'+ this.point.customer + '</strong>' + '</br>' + this.point.address + '</br>' + '<strong>' +'RoofSquares: '+ '</strong>' + this.point.RoofSquares + '</br>' + '<strong>' + 'RSA: '+ '</strong>' + this.point.RSA + '</br>';
+                        }
+                    },
+                    colorAxis: {
+                        visible:true,
+                        start: 1,
+                        min: 1,
+                        max: 20
+                      },
+                    plotOptions: {
+                        mappoint: {
+                            cluster: {
+                                enabled: true,
+                                allowOverlap: false,
+                                animation: {
+                                    duration: 1000
+                                },
+                                layoutAlgorithm: {
+                                    type: 'grid',
+                                    gridSize: 70
+                                },
+                                zones: [{
+                                    from: 1,
+                                    to: 4,
+                                    marker: {
+                                        radius: 15
+                                    }
+                                }, {
+                                    from: 5,
+                                    to: 9,
+                                    marker: {
+                                        radius: 17
+                                    }
+                                }, {
+                                    from: 10,
+                                    to: 15,
+                                    marker: {
+                                        radius: 19
+                                    }
+                                }, {
+                                    from: 16,
+                                    to: 20,
+                                    marker: {
+                                        radius: 21
+                                    }
+                                }, {
+                                    from: 21,
+                                    to: 100,
+                                    marker: {
+                                        radius: 25
+                                    }
+                                }]                                
+                            }
+                        }
+                    },
+                    series: [{
+                        name: 'Basemap',
+                        borderColor: '#A0A0A0',
+                        nullColor: 'rgba(200, 200, 200, 0.3)',
+                        showInLegend: false,
+                        joinBy: ['postal-code', 'code'],
+                        dataLabels: {
+                            enabled: true,
+                            allowOverlap: true,
+                            color: 0,
+                            format: '{point.postal-code}',                        
+                            style: {
+                                textTransform: 'uppercase'
+                            }
+                        }                   
+                    }, {
+                        type: 'mappoint',
+                        enableMouseTracking: true,
+                        colorKey: 'clusterPointsAmount',
+                        name: 'Cities',
+                        color: Highcharts.getOptions().colors[1],
+                        turboThreshold: 1000000,
+                        data: data
+                    }]
+                });
+                document.getElementById('RSAcompleted').innerHTML = "<strong>" + "RSA Completed: "+ RSAcompleted + "</strong>"
+                document.getElementById('RSApending').innerHTML = "<strong>" + "RSA Pending: "+ RSApending + "</strong>" ; 
+            }
+            roofJson = {{geojson|safe}} 
+            RSAcompleted = {{RSAcompleted}}
+            RSApending = {{RSApending}}
+            RoofMapping(roofJson, RSAcompleted, RSApending,'Cluster Points')
+            const dropdown = document.getElementById('StateCode');    
+            dropdown.addEventListener('change', () => {  
+            var select = document.getElementById('StateCode'); 
+            if (select.options[select.selectedIndex].text == 'All'){
+                RoofMapping(roofJson, RSAcompleted, RSApending,'Cluster Points')}
+            else
+            {
+                if (select.options[select.selectedIndex].text == 'Pennsylvania') {
+                    url = "http://148.77.75.60:6050/StateCode/PA"; 
+                    state='Pennsylvania'} 
+                else if (select.options[select.selectedIndex].text == 'New Jersey') {
+                    url = "http://148.77.75.60:6050/StateCode/NJ"; 
+                    state='New Jersey'} 
+                else if (select.options[select.selectedIndex].text == 'Massachusetts') {
+                    url = "http://148.77.75.60:6050/StateCode/MA"; 
+                    state='Massachusetts'}
+                else if (select.options[select.selectedIndex].text == 'Maryland') {
+                    url = "http://148.77.75.60:6050/StateCode/MD"; 
+                    state='Maryland'}
+                else if (select.options[select.selectedIndex].text == 'New York') {
+                    url = "http://148.77.75.60:6050/StateCode/NY"; 
+                    state='New York'}
+                else if (select.options[select.selectedIndex].text == 'Rhode Island') {
+                    url = "http://148.77.75.60:6050/StateCode/RI"; 
+                    state='Rhode Island'}
+                else if (select.options[select.selectedIndex].text == 'Connecticut') {
+                    url = "http://148.77.75.60:6050/StateCode/CT"; 
+                    state='Connecticut'} 
+                else if (select.options[select.selectedIndex].text == 'Florida') {
+                    url = "http://148.77.75.60:6050/StateCode/FL"; 
+                    state='Florida'}
+                $.ajax({
+                    url: url,
+                    success: function(response){
+                        RoofMapping(JSON.parse(response[0]), response[1], response[2], state);
+                    }
+                })
+            }
+        })       
+    </script>
+</body>
+</html>

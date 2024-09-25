@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Create and style clusters</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .map-overlay {
+            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            position: absolute;
+            right: 10px;
+            background-color: rgb(255, 255, 255);
+            border-radius: 5px;
+            padding: 15px;
+            top: 10px
+        }
+
+        [contenteditable] {
+            outline: 0px solid transparent;
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <div class="map-overlay">
+        <fieldset>
+            <select id="StateCode" name="StateCode" height="20px" width="200px">
+                <option value="" selected disabled hidden>Select State-Code</option>
+                <option value="ALL">All</option>
+                <option value="CT">Connecticut</option>
+                <option value="FL">Florida</option>
+                <option value="MD">Maryland</option>
+                <option value="MA">Massachusetts</option>
+                <option value="NJ">New Jersey</option>
+                <option value="NY">New York</option>
+                <option value="PA">Pennsylvania</option>
+                <option value="RI">Rhode Island</option>
+            </select>
+            <div id='Summary' align='left'><strong></strong></div>
+            <div id='RSAcompleted' align='left'></div>
+            <div id='RSApending' align='left'></div>
+        </fieldset>
+    </div>
+    <script>
+        // Mapbox Access Token  
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic2FuZHJhLW1hcGJveCIsImEiOiJja3lqbjJ5OWcwOGtlMnV1ZjgzYXBla2d0In0.OwBqE3U0KXSfWXWpB5Uhrg';
+
+        function save() {
+            var editElem = document.getElementById('RSA')
+            var text = (document.getElementById('RSA').innerText).replace(/\s+/g, '')
+            if (text == 'Completed' || text == 'completed' && document.getElementById('RoofSquares') != 0) {
+                document.getElementById('RSA').innerText = 'Completed'
+                editElem.contentEditable = false
+                $.ajax({
+                    type: 'GET',
+                    url: '/RSAupdate/' + customer + '/' + address + '/' + 'Completed',
+                })
+            }
+            else
+                document.getElementById('RSA').innerText = 'Pending'
+        }
+        function edit() {
+            var editElem = document.getElementById('RSA')
+            editElem.contentEditable = true
+        }
+        function Mapping(data, mapTotalRSA, mapRSAcompleted, mapRSApending) {
+            const map = new mapboxgl.Map({
+                container: 'map',
+                // Satellite view with Street styles               
+                style: 'mapbox://styles/mapbox/satellite-streets-v11',
+                center: [-70.5917, 35.6699],
+                zoom: 4
+            });
+
+            map.on('load', () => {
+                // Add a new source from our GeoJSON data and
+                // set the 'cluster' option to true. GL-JS will
+                // add the point_count property to your source data.
+                map.addSource('Trinity Roofs', {
+                    type: 'geojson',
+                    // Pointing to roofing GeoJSON data. 
+                    data: data,
+                    cluster: true,
+                    clusterMaxZoom: 14, // Max zoom to cluster points on
+                    clusterRadius: 50 // Radius of each cluster when clustering points (defaults to 50)
+                });
+
+                map.addLayer({
+                    id: 'clusters',
+                    type: 'circle',
+                    source: 'Trinity Roofs',
+                    filter: ['has', 'point_count'],
+                    paint: {
+                        // with three steps to implement three types of circles:
+                        //   * Blue, 20px circles when point count is less than 100
+                        //   * Yellow, 30px circles when point count is between 100 and 750
+                        //   * Pink, 40px circles when point count is greater than or equal to 750
+                        'circle-color': [
+                            'step',
+                            ['get', 'point_count'],
+                            '#51bbd6',
+                            100,
+                            '#f1f075',
+                            750,
+                            '#f28cb1'
+                        ],
+                        'circle-radius': [
+                            'step',
+                            ['get', 'point_count'],
+                            20,
+                            100,
+                            30,
+                            750,
+                            40
+                        ]
+                    }
+                });
+
+                map.addLayer({
+                    id: 'cluster-count',
+                    type: 'symbol',
+                    source: 'Trinity Roofs',
+                    filter: ['has', 'point_count'],
+                    layout: {
+                        'text-field': '{point_count_abbreviated}',
+                        'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+                        'text-size': 12
+                    }
+                });
+
+                map.addLayer({
+                    id: 'unclustered-point',
+                    type: 'circle',
+                    source: 'Trinity Roofs',
+                    filter: ['!', ['has', 'point_count']],
+                    paint: {
+                        'circle-color': '#00ff00',
+                        'circle-radius': 8,
+                        'circle-stroke-width': 1,
+                        'circle-stroke-color': '#ffffff'
+                    }
+                });
+
+                // inspect a cluster on click
+                map.on('click', 'clusters', (e) => {
+                    const features = map.queryRenderedFeatures(e.point, {
+                        layers: ['clusters']
+                    });
+                    const clusterId = features[0].properties.cluster_id;
+                    map.getSource('Trinity Roofs').getClusterExpansionZoom(
+                        clusterId,
+                        (err, zoom) => {
+                            if (err) return;
+
+                            map.easeTo({
+                                center: features[0].geometry.coordinates,
+                                zoom: zoom
+                            });
+                        }
+                    );
+                });
+
+                // When a click event occurs on a feature in
+                // the unclustered-point layer, open a popup at
+                // the location of the feature, with
+                // description HTML from its properties.
+
+                map.on('click', 'unclustered-point', (e) => {
+                    map.flyTo({ center: e.features[0].geometry.coordinates, zoom: 18 })
+
+                    map.on('click', 'unclustered-point', (e) => {
+                        var marker = new mapboxgl.Marker({ color: 'grey' })
+                        coordinates = e.features[0].geometry.coordinates.slice();
+                        customer = e.features[0].properties.customer;
+                        address = e.features[0].properties.address;
+                        RSA = e.features[0].properties.RSA;
+                        RoofSquares = e.features[0].properties.roofSquares;
+
+                        if (RSA == 'Completed') {
+
+                            // Ensure that if the map is zoomed out such that
+                            // multiple copies of the feature are visible, the
+                            // popup appears over the copy being pointed to.
+                            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                            }
+
+                            new mapboxgl.Popup()
+                                .setLngLat(coordinates)
+                                .setHTML(
+                                    `<strong> Customer: </strong> ${customer} <br> 
+                                <strong> Address: </strong> ${address} <br> 
+                                <strong> RoofSquares: </strong> ${RoofSquares}
+                                <strong> RSA: </strong> ${RSA} <br>`
+                                )
+                                .addTo(map);
+                        }
+                        else if (RSA == 'Pending') {
+                            // Ensure that if the map is zoomed out such that
+                            // multiple copies of the feature are visible, the
+                            // popup appears over the copy being pointed to.
+                            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                            }
+                            new mapboxgl.Popup()
+                                .setLngLat(coordinates)
+                                .setHTML(
+                                    `<strong> Customer: </strong> ${customer} <br>
+                                <strong> Address: </strong> ${address} <br> 
+                                <strong> RoofSquares: </strong> ${RoofSquares} <br>
+                                <strong> RSA: </strong> <span id='RSA' contenteditable='true'> ${RSA} </span> 
+                                <input id ='edit' type = 'button' onclick= edit() value='edit'/> <input id ='save' type = 'button' onclick = save() value='save'/> <br>`
+                                )
+                                .addTo(map);
+                        }
+                    })
+                });
+                map.on('mouseenter', 'clusters', () => {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+                map.on('mouseleave', 'clusters', () => {
+                    map.getCanvas().style.cursor = '';
+                });
+            });
+            document.getElementById('Summary').innerHTML = "<strong>" + "RSA Roofs: " + "</strong>" + mapTotalRSA + "<br>"
+            document.getElementById('RSAcompleted').innerHTML = "<strong>" + "RSA Completed: " + "</strong>" + mapRSAcompleted + "<br>"
+            document.getElementById('RSApending').innerHTML = "<strong>" + "RSA Pending: " + "</strong>" + mapRSApending
+        }
+
+        roofJson = {{ geojson | safe }}; TotalRSA = {{ TotalRoofs }}; RSAcompleted = {{ RSAcompleted }}; RSApending = {{ RSApending }};
+        // mapping roofjson on cluster style maps
+        Mapping(roofJson, TotalRSA, RSAcompleted, RSApending)
+
+        const dropdown = document.getElementById('StateCode');
+        dropdown.addEventListener('change', () => {
+            var select = document.getElementById('StateCode');
+
+            if (select.options[select.selectedIndex].text == 'All') {
+                Mapping(roofJson, TotalRSA, RSAcompleted, RSApending)
+            }
+            else {
+                if (select.options[select.selectedIndex].text == 'Pennsylvania') {
+                    url = "/StateCode/PA"
+                }
+                else if (select.options[select.selectedIndex].text == 'New Jersey') {
+                    url = "/StateCode/NJ"
+                }
+                else if (select.options[select.selectedIndex].text == 'Massachusetts') {
+                    url = "/StateCode/MA"
+                }
+                else if (select.options[select.selectedIndex].text == 'Maryland') {
+                    url = "/StateCode/MD"
+                }
+                else if (select.options[select.selectedIndex].text == 'New York') {
+                    url = "/StateCode/NY"
+                }
+                else if (select.options[select.selectedIndex].text == 'Rhode Island') {
+                    url = "/StateCode/RI"
+                }
+                else if (select.options[select.selectedIndex].text == 'Connecticut') {
+                    url = "/StateCode/CT"
+                }
+                else if (select.options[select.selectedIndex].text == 'Florida') {
+                    url = "/StateCode/FL"
+                }
+                $.ajax({
+                    url: url,
+                    success: function (response) {
+                        Mapping(JSON.parse(response[0]), response[1], response[2], response[3]);
+                    }
+                })
+            }
+        })
+    </script>
+</body>
+
+</html>

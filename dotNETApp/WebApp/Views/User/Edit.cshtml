@@ -1,0 +1,68 @@
+﻿@using Models
+@model List<Models.UserViewModel>
+
+@{
+    ViewData["Title"] = "BP Users";
+    string[] TableHeaders = new string[]
+    {
+    "userid"
+    ,"username"
+    ,"validfromdate"
+    ,"useremail"
+    ,"loginattempts"
+    ,"FullUser"
+    ,"Action"
+    };
+}
+<h3>@ViewData["Title"]</h3>
+<form>
+    <button asp-action="Create" asp-controller="User" class="btn btn-primary">Create User</button>
+    <table class=" table table-responsive table-hover table-bordered">
+        <thead>
+            <tr class="table-active">
+                @{
+                    foreach (var head in TableHeaders)
+                    {
+                        <th>
+                        @head
+                        </th>
+                    }
+                 }
+                    </tr>
+                    
+        </thead>
+        <tbody>
+            @{
+                if (Model != null && Model.Any())
+                {
+                    foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>@user.userid</td>
+                            <td>@user.username</td>
+                            <td>@(user.validfromdate?.ToString("MM/dd/yyyy") ?? "No Recorded Login")</td>
+                            <td>@user.useremail</td>
+                            <td>@user.loginattempts</td>
+                            <td>@user.FullUser</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a asp-controller="User" asp-action="Edit" asp-route-id="@user.userid" class="btn btn-primary">Edit</a>
+                                    <a asp-controller="User" asp-action="Delete" asp-route-id="@user.userid" class="btn btn-danger">Delete</a>
+
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else {
+                        <tr>
+                            <td colspan="7">
+                                <div>
+                                    No Users Available at this moment.
+                                </div>
+                            </td>
+                        </tr>
+                    }
+            }
+    </table>
+</form>

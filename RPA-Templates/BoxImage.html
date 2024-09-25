@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoxFile</title>
+</head>
+<style>
+    .center {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 300px;
+        height: 300px;
+    }
+</style>
+
+<body>
+    <h4 style="text-align:center">{{imagefile}}</h4>
+    <img src="{{url_for('static', filename = imagefile)}}" alt="" width="300" height="300" class="center">
+</body>
+
+</html>

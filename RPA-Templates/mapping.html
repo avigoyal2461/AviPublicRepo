@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    
+    #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+    }
+    
+    .mapboxgl-popup {
+        max-width: 200px;
+    }
+    
+    .mapboxgl-popup-content {
+        text-align: center;
+        font-family: "Open Sans", sans-serif;
+    }
+
+    [contenteditable] {
+        outline: 0px solid transparent;
+        padding: 5px;
+    }    
+    .map-overlay {
+        font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        position: absolute;        
+        right: 10px;
+        background-color: rgb(196, 243, 196);
+        border-radius: 5px;
+        padding: 10px;
+        top:10px
+    }  
+    label { color: rgb(171, 82, 223);
+            text-align: center;
+            padding-bottom: 20px;
+            font-weight: bold;
+            font-size: 1.3em
+        }      
+</style>
+<head>
+    <meta charset="utf-8" />
+    <title>Mapbox Services</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" />
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
+    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+</head>
+<body>
+
+    <div id="map"></div>
+    <div class="map-overlay"> 
+            <fieldset>
+                <!-- <label>StateWise Filtering</label><br> -->
+                <select id="StateCode" name="StateCode" height="20px" width="200px">
+                    <option value="" selected disabled hidden>Select State-Code</option>
+                    <option value="NY">All</option> 
+                    <option value="PN">Pennsylvania</option>
+                    <option value="NJ">New Jersey</option>
+                    <option value="MA">Massachusetts</option>                
+                </select>           
+                <div id='summary' align='center'><strong></strong></div> 
+                <div id='RSAcompleted' align='center'></div>
+                <div id='RSApending' align='center'></div>
+            </fieldset>
+    </div> 
+  
+    <script>
+        function save(RoofSquare) {
+            var editElem = document.getElementById('RSA')
+            var text = (document.getElementById('RSA').innerText).replace(/\s+/g, '')
+            if (text =='Completed' || text =='completed' && RoofSquare != 0){
+                document.getElementById('RSA').innerText= 'Completed'
+                editElem.contentEditable=false 
+                $.ajax({
+                    url: "/UpdateSQL_RSA",
+                  })
+            }
+            else
+                document.getElementById('RSA').innerText= 'Pending'
+        }
+        function edit() {
+            var editElem = document.getElementById('RSA')
+            editElem.contentEditable=true
+        }
+
+        function mapping(data){
+            mapboxgl.accessToken =
+                "pk.eyJ1Ijoic2FuZHJhLW1hcGJveCIsImEiOiJja3lqbjJ5OWcwOGtlMnV1ZjgzYXBla2d0In0.OwBqE3U0KXSfWXWpB5Uhrg";
+
+            const map = new mapboxgl.Map({
+                container: "map",
+                style: "mapbox://styles/mapbox/streets-v11",
+                center: [-80, 37.8],
+                zoom: 5,
+            });   
+            var addresses = 0
+            var completed = 0
+            var pending = 0
+            for ([key,value] of Object.entries(data)) { 
+                addresses++                             
+                var lng = (value['geoCoordinates'][0])
+                var lat = (value['geoCoordinates'][1])  
+            
+                var popup = new mapboxgl.Popup({ offset: 25 })
+                if (value['RSA']=='Completed') { 
+                    completed++            
+                    var marker = new mapboxgl.Marker({color: 'grey'})
+                    marker.setLngLat([lng,lat]).setPopup(
+                    popup.setHTML(                       
+                        "<p id='roofing' align='left'>"+ "<strong>" + value['Customer Name'] + "</strong>" +"<br>" 
+                        + value['address'] + "<br>" 
+                        + "<strong>" + "RoofSquares =" + "</strong>" + value['RoofSquares'] + "<br>"
+                        + "<strong>" + "RSA: " + "</strong>" + value['RSA'] 
+                        )).addTo(map); 
+                }
+                else if (value['RSA']=='Pending'){
+                    pending++
+                    var marker = new mapboxgl.Marker({color:'orange'})
+                    marker.setLngLat([lng,lat]).setPopup(
+                    popup.setHTML(                       
+                        "<p id='roofing' align='left'>"+ "<strong>" + value['Customer Name'] + "</strong>" +"<br>" 
+                        + value['address'] + "<br>" 
+                        + "<strong>" + "RoofSquares =" + "</strong>" + value['RoofSquares'] + "<br>"
+                        + "<strong>" + "RSA: " + "</strong>" + "<span id='RSA' contenteditable='true'>" + value['RSA'] + "</span>" 
+                        + "<input id ='edit' type = 'button' onclick= edit() value='edit'/> <input id ='save' type = 'button' onclick = save("+value['RoofSquares']+") value='save'/>" + "<br>"                  
+                        )).addTo(map); 
+                }             
+            } 
+            document.getElementById('summary').innerHTML = "<strong>"+"Total Roofs: " + addresses + "</strong>"
+            document.getElementById('RSAcompleted').innerHTML = "<strong>" + "RSA Completed: "+completed + "</strong>"
+            document.getElementById('RSApending').innerHTML = "<strong>" + "RSA Pending: "+pending + "</strong>" ;   
+        }
+        rawdata = {{geojson|safe}}
+        mapping(rawdata)
+        const dropdown = document.getElementById('StateCode');    
+        dropdown.addEventListener('change', () => {  
+            var select = document.getElementById('StateCode'); 
+            if (select.options[select.selectedIndex].text == 'All'){ 
+                mapping(rawdata)}
+            else
+            {
+                if (select.options[select.selectedIndex].text == 'Pennsylvania') url = "http://148.77.75.60:6050/StateCode_PN" 
+                else if (select.options[select.selectedIndex].text == 'New Jersey') url = "http://148.77.75.60:6050/StateCode_NJ" 
+                else if (select.options[select.selectedIndex].text == 'Massachusetts') url = "http://148.77.75.60:6050/StateCode_MA" 
+                $.ajax({
+                    url: url,
+                    success: function(response){
+                        mapping(JSON.parse(response));
+                    }
+                })
+            }
+        }) 
+    </script>
+</body>
+</html>
