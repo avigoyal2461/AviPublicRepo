@@ -30,9 +30,7 @@ class chromedrivertests():
         #initializes the driver, self.driver can be used in any method we set
         # self.driver = webdriver.Chrome(executable_path=r"CHROMEDRIVER.EXE PATH", options=chrome_options)
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-# powerautomateteam@trinity-solar.com
-# pA951753!
-
+        
     def get_website(self):
         self.driver.get("https://dash.genability.com/explorer/tariffs/522/calculator")
         
