@@ -19,9 +19,9 @@ namespace WebApplication1.Controllers
         {
             _workQueueItemService = workQueueItemService;
             _userService = userService;
-			adminUsers = _userService.GetAdminUsers();
-		}
-		[HttpGet("WorkQueueItems")]
+	    adminUsers = _userService.GetAdminUsers();
+	}
+	[HttpGet("WorkQueueItems")]
         public IActionResult Index()
         {
             workqueueItemList = _workQueueItemService.FetchAll();
@@ -57,7 +57,6 @@ namespace WebApplication1.Controllers
         public IActionResult Retry(string id, Guid queueId)
         {
 			//add check for User.Identity.Name
-			adminUsers = _userService.GetAdminUsers();
 			if (adminUsers.Contains(User.Identity.Name.ToLower()))
 			{
 				_workQueueItemService.retryItem(id);
